@@ -1,8 +1,6 @@
 // ============================================================
 //  LoginView.swift
 //  ChallengMe
-//
-//  Pantalla de inicio de sesión — solo UI, sin peticiones
 // ============================================================
 
 import SwiftUI
@@ -11,12 +9,12 @@ struct LoginView: View {
 
     @Environment(\.dismiss) private var dismiss
 
-    @State private var email: String = ""
-    @State private var password: String = ""
-    @State private var showPassword: Bool = false
-    @State private var isLoading: Bool = false
+    @State private var email:        String = ""
+    @State private var password:     String = ""
+    @State private var showPassword: Bool   = false
+    @State private var isLoading:    Bool   = false
+    @State private var errorMessage: String?
 
-    // Validación visual mínima
     private var isFormValid: Bool {
         !email.trimmingCharacters(in: .whitespaces).isEmpty &&
         password.count >= 6
@@ -44,7 +42,6 @@ struct LoginView: View {
 
                     // ── Campos ───────────────────────────────
                     VStack(spacing: DS.Space.md) {
-
                         DSTextField(
                             title: "Correo electrónico",
                             placeholder: "tu@correo.com",
@@ -72,14 +69,26 @@ struct LoginView: View {
                     }
                     .padding(.top, DS.Space.sm)
 
+                    // ── Error ────────────────────────────────
+                    if let msg = errorMessage {
+                        HStack(spacing: DS.Space.xs) {
+                            Image(systemName: "exclamationmark.circle.fill")
+                                .font(.system(size: 14))
+                            Text(msg)
+                                .font(DS.Font.small)
+                        }
+                        .foregroundStyle(DS.Color.danger)
+                        .padding(.top, DS.Space.md)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
+
                     // ── Botón principal ──────────────────────
                     Button {
-                        // sin petición por ahora
+                        login()
                     } label: {
                         Group {
                             if isLoading {
-                                ProgressView()
-                                    .tint(.white)
+                                ProgressView().tint(.white)
                             } else {
                                 Text("Iniciar sesión")
                                     .font(DS.Font.heading3)
@@ -96,7 +105,6 @@ struct LoginView: View {
                     .disabled(!isFormValid || isLoading)
                     .animation(DS.Animation.standard, value: isFormValid)
                     .padding(.top, DS.Space.xl)
-
 
                     // ── Pie ──────────────────────────────────
                     HStack(spacing: DS.Space.xs) {
@@ -115,6 +123,7 @@ struct LoginView: View {
                     .padding(.bottom, DS.Space.lg)
                 }
                 .padding(.horizontal, DS.Space.lg)
+                .animation(DS.Animation.standard, value: errorMessage)
             }
         }
         .navigationBarBackButtonHidden()
@@ -124,161 +133,23 @@ struct LoginView: View {
             }
         }
     }
-}
 
-// ── Componentes internos ─────────────────────────────────────
-
-struct DSTextField: View {
-    let title: String
-    let placeholder: String
-    let icon: String
-    @Binding var text: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: DS.Space.xs) {
-            Text(title)
-                .font(DS.Font.micro)
-                .foregroundStyle(DS.Color.textSecondary)
-
-            HStack(spacing: DS.Space.sm) {
-                Image(systemName: icon)
-                    .font(.system(size: 16))
-                    .foregroundStyle(DS.Color.textSecondary)
-                    .frame(width: 20)
-
-                TextField("", text: $text, prompt:
-                    Text(placeholder).foregroundStyle(DS.Color.textSecondary.opacity(0.6))
+    // ── Lógica ────────────────────────────────────────────────
+    private func login() {
+        Task {
+            isLoading    = true
+            errorMessage = nil
+            do {
+                try await AuthService.shared.loginEmail(
+                    email: email.trimmingCharacters(in: .whitespaces),
+                    password: password
                 )
-                .font(DS.Font.body)
-                .foregroundStyle(DS.Color.textPrimary)
+                // AuthManager.isAuthenticated → true
+                // ContentView cambia automáticamente a DashboardView
+            } catch {
+                errorMessage = error.localizedDescription
             }
-            .padding(DS.Space.md)
-            .background(DS.Color.elevated)
-            .clipShape(RoundedRectangle(cornerRadius: DS.Radius.sm))
-            .overlay(
-                RoundedRectangle(cornerRadius: DS.Radius.sm)
-                    .strokeBorder(
-                        text.isEmpty ? DS.Color.border : DS.Color.primary.opacity(0.5),
-                        lineWidth: 1
-                    )
-            )
-        }
-    }
-}
-
-struct DSSecureField: View {
-    let title: String
-    let placeholder: String
-    @Binding var text: String
-    @Binding var showPassword: Bool
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: DS.Space.xs) {
-            Text(title)
-                .font(DS.Font.micro)
-                .foregroundStyle(DS.Color.textSecondary)
-
-            HStack(spacing: DS.Space.sm) {
-                Image(systemName: "lock")
-                    .font(.system(size: 16))
-                    .foregroundStyle(DS.Color.textSecondary)
-                    .frame(width: 20)
-
-                Group {
-                    if showPassword {
-                        TextField("", text: $text, prompt:
-                            Text(placeholder).foregroundStyle(DS.Color.textSecondary.opacity(0.6))
-                        )
-                    } else {
-                        SecureField("", text: $text, prompt:
-                            Text(placeholder).foregroundStyle(DS.Color.textSecondary.opacity(0.6))
-                        )
-                    }
-                }
-                .font(DS.Font.body)
-                .foregroundStyle(DS.Color.textPrimary)
-
-                Button {
-                    showPassword.toggle()
-                } label: {
-                    Image(systemName: showPassword ? "eye.slash" : "eye")
-                        .font(.system(size: 16))
-                        .foregroundStyle(DS.Color.textSecondary)
-                }
-            }
-            .padding(DS.Space.md)
-            .background(DS.Color.elevated)
-            .clipShape(RoundedRectangle(cornerRadius: DS.Radius.sm))
-            .overlay(
-                RoundedRectangle(cornerRadius: DS.Radius.sm)
-                    .strokeBorder(
-                        text.isEmpty ? DS.Color.border : DS.Color.primary.opacity(0.5),
-                        lineWidth: 1
-                    )
-            )
-        }
-    }
-}
-
-struct DSDivider: View {
-    let label: String
-
-    var body: some View {
-        HStack(spacing: DS.Space.sm) {
-            Rectangle()
-                .fill(DS.Color.border)
-                .frame(height: 1)
-
-            Text(label)
-                .font(DS.Font.micro)
-                .foregroundStyle(DS.Color.textSecondary)
-                .fixedSize()
-
-            Rectangle()
-                .fill(DS.Color.border)
-                .frame(height: 1)
-        }
-    }
-}
-
-struct SocialButton: View {
-    let icon: String
-    let label: String
-
-    var body: some View {
-        Button {} label: {
-            HStack(spacing: DS.Space.sm) {
-                Image(systemName: icon)
-                    .font(.system(size: 18, weight: .medium))
-                Text(label)
-                    .font(DS.Font.heading3)
-            }
-            .foregroundStyle(DS.Color.textPrimary)
-            .frame(maxWidth: .infinity)
-            .frame(height: 48)
-            .background(DS.Color.elevated)
-            .clipShape(RoundedRectangle(cornerRadius: DS.Radius.md))
-            .overlay(
-                RoundedRectangle(cornerRadius: DS.Radius.md)
-                    .strokeBorder(DS.Color.border, lineWidth: 1)
-            )
-        }
-    }
-}
-
-struct BackButton: View {
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: DS.Space.xs) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 16, weight: .semibold))
-            }
-            .foregroundStyle(DS.Color.textPrimary)
-            .padding(DS.Space.sm)
-            .background(DS.Color.elevated)
-            .clipShape(RoundedRectangle(cornerRadius: DS.Radius.sm))
+            isLoading = false
         }
     }
 }
@@ -287,4 +158,5 @@ struct BackButton: View {
     NavigationStack {
         LoginView()
     }
+    .environmentObject(AuthManager.shared)
 }

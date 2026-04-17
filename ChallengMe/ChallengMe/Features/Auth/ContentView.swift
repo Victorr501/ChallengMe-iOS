@@ -8,13 +8,20 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject private var authManager: AuthManager
+
     var body: some View {
-        NavigationStack {
-            WelcomeView()
+        if authManager.isAuthenticated {
+            MainLayout()
+        } else {
+            NavigationStack {
+                WelcomeView()
+            }
         }
     }
 }
 
 #Preview {
     ContentView()
+        .environmentObject(AuthManager.shared)
 }

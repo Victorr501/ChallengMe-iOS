@@ -1,8 +1,6 @@
 // ============================================================
 //  RegisterView.swift
 //  ChallengMe
-//
-//  Pantalla de registro — solo UI, sin peticiones
 // ============================================================
 
 import SwiftUI
@@ -11,15 +9,15 @@ struct RegisterView: View {
 
     @Environment(\.dismiss) private var dismiss
 
-    @State private var name: String = ""
-    @State private var email: String = ""
-    @State private var password: String = ""
-    @State private var confirmPassword: String = ""
-    @State private var showPassword: Bool = false
-    @State private var showConfirmPassword: Bool = false
-    @State private var acceptedTerms: Bool = false
+    @State private var name:                String = ""
+    @State private var email:               String = ""
+    @State private var password:            String = ""
+    @State private var confirmPassword:     String = ""
+    @State private var showPassword:        Bool   = false
+    @State private var showConfirmPassword: Bool   = false
+    @State private var isLoading:           Bool   = false
+    @State private var errorMessage:        String?
 
-    // Validación visual
     private var passwordsMatch: Bool {
         !password.isEmpty && password == confirmPassword
     }
@@ -28,8 +26,7 @@ struct RegisterView: View {
         !name.trimmingCharacters(in: .whitespaces).isEmpty &&
         !email.trimmingCharacters(in: .whitespaces).isEmpty &&
         password.count >= 6 &&
-        passwordsMatch &&
-        acceptedTerms
+        passwordsMatch
     }
 
     var body: some View {
@@ -56,7 +53,7 @@ struct RegisterView: View {
                     VStack(spacing: DS.Space.md) {
 
                         DSTextField(
-                            title: "Nombre completo",
+                            title: "Nombre de usuario",
                             placeholder: "Tu nombre",
                             icon: "person",
                             text: $name
@@ -80,7 +77,6 @@ struct RegisterView: View {
                             showPassword: $showPassword
                         )
 
-                        // Confirmación con feedback visual
                         VStack(alignment: .leading, spacing: DS.Space.xs) {
                             DSSecureField(
                                 title: "Confirmar contraseña",
@@ -91,9 +87,13 @@ struct RegisterView: View {
 
                             if !confirmPassword.isEmpty {
                                 HStack(spacing: DS.Space.xs) {
-                                    Image(systemName: passwordsMatch ? "checkmark.circle.fill" : "xmark.circle.fill")
+                                    Image(systemName: passwordsMatch
+                                          ? "checkmark.circle.fill"
+                                          : "xmark.circle.fill")
                                         .font(.system(size: 13))
-                                    Text(passwordsMatch ? "Las contraseñas coinciden" : "Las contraseñas no coinciden")
+                                    Text(passwordsMatch
+                                         ? "Las contraseñas coinciden"
+                                         : "Las contraseñas no coinciden")
                                         .font(DS.Font.micro)
                                 }
                                 .foregroundStyle(passwordsMatch ? DS.Color.success : DS.Color.danger)
@@ -103,59 +103,46 @@ struct RegisterView: View {
                         }
                     }
 
-                    // ── Indicador de fortaleza ───────────────
+                    // ── Fortaleza ────────────────────────────
                     if !password.isEmpty {
                         PasswordStrengthBar(password: password)
                             .padding(.top, DS.Space.sm)
                     }
 
-                    // ── Términos y condiciones ───────────────
-                    Button {
-                        withAnimation(DS.Animation.standard) {
-                            acceptedTerms.toggle()
-                        }
-                    } label: {
-                        HStack(alignment: .top, spacing: DS.Space.sm) {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 4)
-                                    .strokeBorder(
-                                        acceptedTerms ? DS.Color.primary : DS.Color.border,
-                                        lineWidth: 1.5
-                                    )
-                                    .frame(width: 20, height: 20)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 4)
-                                            .fill(acceptedTerms ? DS.Color.primary.opacity(0.15) : .clear)
-                                    )
-
-                                if acceptedTerms {
-                                    Image(systemName: "checkmark")
-                                        .font(.system(size: 11, weight: .bold))
-                                        .foregroundStyle(DS.Color.primary)
-                                }
-                            }
-
-                            Text("Acepto los **Términos de Uso** y la **Política de Privacidad** de ChallengMe")
+                    // ── Error ────────────────────────────────
+                    if let msg = errorMessage {
+                        HStack(spacing: DS.Space.xs) {
+                            Image(systemName: "exclamationmark.circle.fill")
+                                .font(.system(size: 14))
+                            Text(msg)
                                 .font(DS.Font.small)
-                                .foregroundStyle(DS.Color.textSecondary)
-                                .multilineTextAlignment(.leading)
                         }
+                        .foregroundStyle(DS.Color.danger)
+                        .padding(.top, DS.Space.md)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
                     }
-                    .padding(.top, DS.Space.lg)
 
                     // ── Botón principal ──────────────────────
-                    Button {} label: {
-                        Text("Crear cuenta")
-                            .font(DS.Font.heading3)
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 52)
+                    Button {
+                        register()
+                    } label: {
+                        Group {
+                            if isLoading {
+                                ProgressView().tint(.white)
+                            } else {
+                                Text("Crear cuenta")
+                                    .font(DS.Font.heading3)
+                                    .foregroundStyle(.white)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
                     }
                     .background(isFormValid ? DS.Color.primary : DS.Color.elevated)
                     .clipShape(RoundedRectangle(cornerRadius: DS.Radius.md))
                     .shadow(color: isFormValid ? DS.Shadow.glowSmColor : .clear,
                             radius: DS.Shadow.glowSmRadius)
-                    .disabled(!isFormValid)
+                    .disabled(!isFormValid || isLoading)
                     .animation(DS.Animation.standard, value: isFormValid)
                     .padding(.top, DS.Space.xl)
 
@@ -174,6 +161,7 @@ struct RegisterView: View {
                     .padding(.bottom, DS.Space.lg)
                 }
                 .padding(.horizontal, DS.Space.lg)
+                .animation(DS.Animation.standard, value: errorMessage)
             }
         }
         .navigationBarBackButtonHidden()
@@ -183,26 +171,45 @@ struct RegisterView: View {
             }
         }
     }
+
+    // ── Lógica ────────────────────────────────────────────────
+    private func register() {
+        Task {
+            isLoading    = true
+            errorMessage = nil
+            do {
+                try await AuthService.shared.register(
+                    email:         email.trimmingCharacters(in: .whitespaces),
+                    password:      password,
+                    nombreUsuario: name.trimmingCharacters(in: .whitespaces)
+                )
+                // AuthManager.isAuthenticated → true
+                // ContentView cambia automáticamente a DashboardView
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isLoading = false
+        }
+    }
 }
 
-// ── Barra de fortaleza de contraseña ────────────────────────
+// ── Barra de fortaleza de contraseña ─────────────────────────
 
 private struct PasswordStrengthBar: View {
-
     let password: String
 
     private var strength: (level: Int, label: String, color: SwiftUI.Color) {
-        let count = password.count
-        let hasUpper = password.range(of: "[A-Z]", options: .regularExpression) != nil
-        let hasNumber = password.range(of: "[0-9]", options: .regularExpression) != nil
-        let hasSpecial = password.range(of: "[^A-Za-z0-9]", options: .regularExpression) != nil
+        let count      = password.count
+        let hasUpper   = password.range(of: "[A-Z]",       options: .regularExpression) != nil
+        let hasNumber  = password.range(of: "[0-9]",       options: .regularExpression) != nil
+        let hasSpecial = password.range(of: "[^A-Za-z0-9]",options: .regularExpression) != nil
 
         var score = 0
-        if count >= 6 { score += 1 }
-        if count >= 10 { score += 1 }
-        if hasUpper { score += 1 }
-        if hasNumber { score += 1 }
-        if hasSpecial { score += 1 }
+        if count >= 6   { score += 1 }
+        if count >= 10  { score += 1 }
+        if hasUpper     { score += 1 }
+        if hasNumber    { score += 1 }
+        if hasSpecial   { score += 1 }
 
         switch score {
         case 0...1: return (1, "Muy débil", DS.Color.danger)
@@ -223,7 +230,6 @@ private struct PasswordStrengthBar: View {
                         .animation(DS.Animation.standard, value: strength.level)
                 }
             }
-
             Text("Fortaleza: \(strength.label)")
                 .font(DS.Font.micro)
                 .foregroundStyle(strength.color)
@@ -235,4 +241,5 @@ private struct PasswordStrengthBar: View {
     NavigationStack {
         RegisterView()
     }
+    .environmentObject(AuthManager.shared)
 }
