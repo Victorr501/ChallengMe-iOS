@@ -56,9 +56,9 @@ final class AuthService {
         nombreUsuario: String
     ) async throws -> AuthResponse {
         let body = RegisterRequest(
-            email:         email,
-            password:      password,
-            nombreUsuario: nombreUsuario
+            Email:         email,
+            Password:      password,
+            NombreUsuario: nombreUsuario
         )
 
         let response: AuthResponse = try await client.send(
