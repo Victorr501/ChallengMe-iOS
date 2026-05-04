@@ -36,7 +36,7 @@ final class AuthService {
         let body = LoginRequest(email: email, password: password)
 
         let response: AuthResponse = try await client.send(
-            APIConfig.Endpoint.loginEmail,
+            Endpoint.loginEmail,
             method: .POST,
             body: body
         )
@@ -62,7 +62,7 @@ final class AuthService {
         )
 
         let response: AuthResponse = try await client.send(
-            APIConfig.Endpoint.registro,
+            Endpoint.registro,
             method: .POST,
             body: body
         )
@@ -74,7 +74,7 @@ final class AuthService {
     // ── Logout ────────────────────────────────────────────────
     func logout() async {
         // Petición al servidor (opcional, ignora errores)
-        try? await client.sendVoid(APIConfig.Endpoint.logout, method: .POST)
+        try? await client.sendVoid(Endpoint.logout, method: .POST)
         await auth.logout()
     }
 }
