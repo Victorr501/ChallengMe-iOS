@@ -32,10 +32,10 @@ final class AuthService {
     /// - Returns: AuthResponse con token, id, nombreUsuario y correo
     /// - Throws: APIError si el servidor devuelve error
     @discardableResult
-    func loginEmail(email: String, password: String) async throws -> AuthResponse {
+    func loginEmail(email: String, password: String) async throws -> AuthShipment {
         let body = LoginRequest(email: email, password: password)
 
-        let response: AuthResponse = try await client.send(
+        let response: AuthShipment = try await client.send(
             Endpoint.loginEmail,
             method: .POST,
             body: body
@@ -54,14 +54,14 @@ final class AuthService {
         email: String,
         password: String,
         nombreUsuario: String
-    ) async throws -> AuthResponse {
+    ) async throws -> AuthShipment {
         let body = RegisterRequest(
             Email:         email,
             Password:      password,
             NombreUsuario: nombreUsuario
         )
 
-        let response: AuthResponse = try await client.send(
+        let response: AuthShipment = try await client.send(
             Endpoint.registro,
             method: .POST,
             body: body

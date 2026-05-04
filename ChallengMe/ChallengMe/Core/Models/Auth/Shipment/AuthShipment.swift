@@ -1,4 +1,4 @@
 // Equivalente: AuthShipment + datos del usuario que devuelve el token
-struct AuthResponse: Decodable {
+struct AuthShipment: Decodable {
     let token:         String
 }
