@@ -63,9 +63,11 @@ struct LoginView: View {
                     // ── Olvidé contraseña ────────────────────
                     HStack {
                         Spacer()
-                        Button("¿Olvidaste tu contraseña?") {}
-                            .font(DS.Font.small)
-                            .foregroundStyle(DS.Color.primaryLight)
+                        NavigationLink(destination: RecuperarPasswordView()) {
+                            Text("¿Olvidaste tu contraseña?")
+                                .font(DS.Font.small)
+                                .foregroundStyle(DS.Color.primaryLight)
+                        }
                     }
                     .padding(.top, DS.Space.sm)
 
