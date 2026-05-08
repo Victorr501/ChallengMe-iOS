@@ -71,6 +71,14 @@ final class AuthService {
         return response
     }
 
+    // ── Recuperar contraseña ──────────────────────────────────
+    /// POST /api/auth/recuperar-password — siempre devuelve 200 (user enumeration prevention)
+    /// - Throws: APIError.serverError si el servidor devuelve 5xx
+    func recuperarPassword(email: String) async throws {
+        let body = RecuperarPasswordRequest(email: email)
+        try await client.sendVoid(Endpoint.recuperarPassword, method: .POST, body: body)
+    }
+
     // ── Logout ────────────────────────────────────────────────
     func logout() async {
         // Petición al servidor (opcional, ignora errores)
