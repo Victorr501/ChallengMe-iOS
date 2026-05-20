@@ -218,4 +218,4 @@ Este software y su código fuente son propiedad exclusiva de sus autores. Queda 
 
 El incumplimiento de estas condiciones podrá dar lugar a acciones legales civiles y penales conforme a la legislación aplicable.
 
-Para solicitar una licencia de uso, contacta con: **victor.rubin@agralamo.com**
+Para solicitar una licencia de uso, contacta con: **vrubinr501@gmail.com*
