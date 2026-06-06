@@ -15,6 +15,9 @@ struct ChallengMeApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(authManager)
+                .onOpenURL { url in
+                    authManager.manejarMicrosoftCallback(url: url)
+                }
         }
     }
 }

@@ -44,6 +44,25 @@ final class AuthService {
         await auth.setToken(response.token)
         return response
     }
+    
+    // ── Login con Microsoft ───────────────────────────────────
+    /// POST /api/auth/login-microsoft
+    /// - Parameter code: El code que devuelve Microsoft tras el login
+    /// - Returns: AuthShipment con el JWT
+    /// - Throws: APIError si el servidor devuelve error
+    @discardableResult
+    func loginMicrosoft(code: String) async throws -> AuthShipment {
+        let body = AuthMicrosoftShipment(code: code)
+        
+        let response: AuthShipment = try await client.send(
+            Endpoint.loginMicrosoft,
+            method: .POST,
+            body: body
+        )
+        
+        await auth.setToken(response.token)
+        return response
+    }
 
     // ── Registro con email ────────────────────────────────────
     /// Equivalente: RegistroEmailAsync(email, password, nombreUsuario)

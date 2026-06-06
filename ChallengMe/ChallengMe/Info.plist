@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>$(MICROSOFT_URL_SCHEME)</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>$(MICROSOFT_URL_SCHEME)</string>
+			</array>
+		</dict>
+	</array>
+	<key>API_BASE_URL</key>
+	<string>$(API_BASE_URL)</string>
+	<key>JWT_ISSUER</key>
+	<string>$(JWT_ISSUER)</string>
+	<key>JWT_AUDIENCE</key>
+	<string>$(JWT_AUDIENCE)</string>
+	<key>KEYCHAIN_TOKEN_KEY</key>
+	<string>$(KEYCHAIN_TOKEN_KEY)</string>
+	<key>BLOB_CONTAINER_NAME</key>
+	<string>$(BLOB_CONTAINER_NAME)</string>
+	<key>COSMOS_DATABASE_ID</key>
+	<string>$(COSMOS_DATABASE_ID)</string>
+	<key>COSMOS_CONTAINER_ID</key>
+	<string>$(COSMOS_CONTAINER_ID)</string>
+	<key>MICROSOFT_CLIENT_ID</key>
+	<string>$(MICROSOFT_CLIENT_ID)</string>
+	<key>MICROSOFT_REDIRECT_URI</key>
+	<string>$(MICROSOFT_REDIRECT_URI)</string>
+	<key>MICROSOFT_URL_SCHEME</key>
+	<string>$(MICROSOFT_URL_SCHEME)</string>
+</dict>
+</plist>

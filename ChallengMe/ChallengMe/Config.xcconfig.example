@@ -1,0 +1,31 @@
+//
+//  Config.xcconfig
+//  ChallengMe
+//
+//  Created by Victor Rubin on 06/06/2026.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://developer.apple.com/documentation/xcode/adding-a-build-configuration-file-to-your-project
+
+// ── API ──────────────────────────────────────────────────────
+API_BASE_URL =
+
+// ── JWT ──────────────────────────────────────────────────────
+JWT_ISSUER =
+JWT_AUDIENCE =
+
+// ── Keychain ─────────────────────────────────────────────────
+KEYCHAIN_TOKEN_KEY =
+
+// ── Azure Storage ────────────────────────────────────────────
+BLOB_CONTAINER_NAME =
+
+// ── Cosmos DB ────────────────────────────────────────────────
+COSMOS_DATABASE_ID =
+COSMOS_CONTAINER_ID =
+
+// ── Microsoft Auth ───────────────────────────────────────────
+MICROSOFT_CLIENT_ID =
+MICROSOFT_REDIRECT_URI =
+MICROSOFT_URL_SCHEME =

@@ -24,7 +24,7 @@ final class AuthManager: ObservableObject {
     @Published private(set) var claims: JWTClaims?
 
     // ── Keychain key ─────────────────────────────────────────
-    private let tokenKey = "com.challengeme.jwt"
+    private let tokenKey = Bundle.main.object(forInfoDictionaryKey: "KEYCHAIN_TOKEN_KEY") as? String ?? "com.challengeme.jwt"
 
     // ── Init: restaura sesión al arrancar ────────────────────
     private init() {
@@ -60,6 +60,21 @@ final class AuthManager: ObservableObject {
         guard let t = readFromKeychain() else { return nil }
         if isExpired(t) { logout(); return nil }
         return t
+    }
+    
+    /// Este metodo lo que hacer es enviar el nombre del codigo y envia el codigo
+    func manejarMicrosoftCallback(url: URL) {
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let code = components.queryItems?.first(where: { $0.name == "code" })?.value
+        else { return }
+        
+        Task {
+            do {
+                try await AuthService.shared.loginMicrosoft(code: code)
+            } catch {
+                print("Error login Microsoft: \(error)")
+            }
+        }
     }
 
     // ── JWT: parseo de claims ─────────────────────────────────

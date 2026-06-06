@@ -6,6 +6,7 @@ enum Endpoint {
     static let refreshToken       = "/auth/refresh"
     static let logout             = "/auth/logout"
     static let recuperarPassword  = "/auth/recuperar-password"
+    static let loginMicrosoft     = "/auth/login-microsoft"
 
     // Evidencias (BlobStorage → "evidencias")
     static func evidence(challengeId: String) -> String {

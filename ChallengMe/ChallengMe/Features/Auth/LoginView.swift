@@ -107,6 +107,39 @@ struct LoginView: View {
                     .disabled(!isFormValid || isLoading)
                     .animation(DS.Animation.standard, value: isFormValid)
                     .padding(.top, DS.Space.xl)
+                    
+                    // ── Separador ────────────────────────────────────────
+                    HStack(spacing: DS.Space.sm) {
+                        Rectangle()
+                            .fill(DS.Color.border)
+                            .frame(height: 1)
+                        Text("o")
+                            .font(DS.Font.small)
+                            .foregroundStyle(DS.Color.textSecondary)
+                        Rectangle()
+                            .fill(DS.Color.border)
+                            .frame(height: 1)
+                    }
+                    .padding(.top, DS.Space.xl)
+
+                    // ── Botón Microsoft ──────────────────────────────────
+                    Button {
+                        loginMicrosoft()
+                    } label: {
+                        HStack(spacing: DS.Space.sm) {
+                            Image(systemName: "m.square.fill")
+                                .font(.system(size: 20))
+                            Text("Continuar con Microsoft")
+                                .font(DS.Font.heading3)
+                        }
+                        .foregroundStyle(DS.Color.textPrimary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
+                    }
+                    .background(DS.Color.elevated)
+                    .clipShape(RoundedRectangle(cornerRadius: DS.Radius.md))
+                    .disabled(isLoading)
+                    .padding(.top, DS.Space.sm)
 
                     // ── Pie ──────────────────────────────────
                     HStack(spacing: DS.Space.xs) {
@@ -153,6 +186,24 @@ struct LoginView: View {
             }
             isLoading = false
         }
+    }
+    
+    private func loginMicrosoft() {
+        let clientId    = Bundle.main.object(forInfoDictionaryKey: "MICROSOFT_CLIENT_ID") as? String ?? ""
+        let redirectUri = Bundle.main.object(forInfoDictionaryKey: "MICROSOFT_REDIRECT_URI") as? String ?? ""
+        let scope = "openid email profile"
+
+        var components = URLComponents(string: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize")!
+        components.queryItems = [
+            URLQueryItem(name: "client_id",     value: clientId),
+            URLQueryItem(name: "response_type", value: "code"),
+            URLQueryItem(name: "redirect_uri",  value: redirectUri),
+            URLQueryItem(name: "scope",         value: scope),
+            URLQueryItem(name: "response_mode", value: "query")
+        ]
+
+        guard let url = components.url else { return }
+        UIApplication.shared.open(url)
     }
 }
 

@@ -7,8 +7,15 @@
 import Foundation
 
 enum APIConfigConstant {
+
+    private static func config(_ key: String) -> String {
+        Bundle.main.object(forInfoDictionaryKey: key) as? String ?? ""
+    }
+
     // ── Base URL ─────────────────────────────────────────────
-    static let baseURL = URL(string: "https://api-challengeme-ddcpawg6ama0cncn.spaincentral-01.azurewebsites.net/api")!
+    static var baseURL: URL {
+        URL(string: config("API_BASE_URL"))!
+    }
 
     // ── Timeouts (segundos) ──────────────────────────────────
     static let timeoutInterval: TimeInterval = 30
@@ -23,26 +30,21 @@ enum APIConfigConstant {
 
     // ── JWT ──────────────────────────────────────────────────
     enum JWT {
-        static let issuer          = "challengeme-api"
-        static let audience        = "challengeme-app"
-        static let expirationHours = 24               // el token dura 24 h
+        static var issuer:   String { APIConfigConstant.config("JWT_ISSUER") }
+        static var audience: String { APIConfigConstant.config("JWT_AUDIENCE") }
+        static let expirationHours = 24
         static let headerKey       = "Authorization"
-        static let headerPrefix    = "Bearer"         // "Bearer <token>"
+        static let headerPrefix    = "Bearer"
     }
 
-
-
     // ── Blob Storage ─────────────────────────────────────────
-    // Contenedor donde el backend almacena las evidencias
-    // (fotos/vídeos) que el usuario sube al completar un reto.
     enum BlobStorage {
-        static let containerName = "evidencias"
+        static var containerName: String { APIConfigConstant.config("BLOB_CONTAINER_NAME") }
     }
 
     // ── Cosmos DB ────────────────────────────────────────────
-    // Solo para referencia; el cliente nunca se conecta directo.
     enum CosmosDB {
-        static let databaseId  = "challengeme-db"
-        static let containerId = "perfiles"
+        static var databaseId:  String { APIConfigConstant.config("COSMOS_DATABASE_ID") }
+        static var containerId: String { APIConfigConstant.config("COSMOS_CONTAINER_ID") }
     }
 }
